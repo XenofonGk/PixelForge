@@ -1,0 +1,22 @@
+# PixelForge demo. Everything here works once Day 24 is done.
+plasma 640 400
+stats
+ascii 60
+save output/01_plasma.bmp
+grayscale
+equalize
+save output/02_gray.bmp
+undo
+undo
+tint 1.2 0.9 0.6
+brightness 15
+sharpen
+save output/03_warm.bmp
+undo
+undo
+undo
+threshold 128
+median
+blur
+save output/04_shapes.bmp
+history

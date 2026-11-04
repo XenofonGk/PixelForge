@@ -1,0 +1,13 @@
+# Build artifacts
+forge
+forge_tests
+play
+*.exe
+*.o
+*.dSYM/
+
+# Output images
+output/*.bmp
+
+# OS
+.DS_Store
