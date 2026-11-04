@@ -14,7 +14,6 @@ void writeLE(std::ostream& out, std::uint32_t value, int bytes) {
     }
 }
 void saveBmp(const Image& img, const std::string& path) {
-    // TODO Day 6: open with ios::binary, throw std::runtime_error if it fails, write the header from Bmp.h, then the rows bottom to top.
     
     std::ofstream out(path, std::ios::binary);
     if (!out) {
@@ -51,10 +50,54 @@ void saveBmp(const Image& img, const std::string& path) {
     }
 }
 std::uint32_t readLE(std::istream& in, int bytes) {
-    // TODO Day 7: read one byte at a time with in.get() and rebuild the value. Throw std::runtime_error if the stream fails.
-    NOT_IMPLEMENTED();
+    std::uint32_t result = 0;
+    for (int i = 0; i < bytes; i++){
+        std::uint32_t b = in.get();
+        if (!in){
+            throw std::runtime_error("Cannot read byte");
+        }
+        result = result | (b << (i * 8));
+    }
+    return result;
 }
 Image loadBmp(const std::string& path) {
-    // TODO Day 7: check the 'B' 'M' signature, use seekg to read the header fields, accept 24 or 32 bits per pixel (reject others), then read rows into an Image. A 32-bit pixel has one extra byte after red.
-    NOT_IMPLEMENTED();
+    std::ifstream in(path, std::ios::binary);
+    if (!in){
+        throw std::runtime_error("Cannot open file");
+    }
+    if (in.get() != 'B' || in.get() != 'M'){ 
+        throw std::runtime_error("Not a BMP file");
+    }
+        in.seekg(18);
+        int width = readLE(in,4);
+        int height = readLE(in,4);
+        in.seekg(28);
+        int bpp = readLE(in,2);
+        if (bpp != 24 && bpp != 32){
+           throw std::runtime_error("Unsupported bits per pixel"); 
+        }
+        in.seekg(10);
+        int offset = readLE(in,4);
+        Image img(width, height);
+        in.seekg(offset);
+        for (int y = img.height()- 1; y >= 0; y--){
+        for (int x = 0; x< img.width(); x++){
+        int b = in.get();
+        int g = in.get();
+        int r = in.get();
+         if (bpp == 32){
+            in.get();
+         }
+         img.at(x,y) = pack(r,g,b);
+         
+        }
+        if (bpp == 24){
+        int pad = bmpRowBytes(img.width()) - img.width() * 3;
+        for ( int i = 0; i < pad; i++){
+            in.get();
+        }
+    }
+    }  
+    return img;
 }
+

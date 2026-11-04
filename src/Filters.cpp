@@ -9,20 +9,27 @@ int luma(Pixel p) { return (red(p) * 299 + green(p) * 587 + blue(p) * 114) / 100
 
 // ---- Day 8 ----
 void invert(Image& img) {
-    // TODO Day 8: replace every pixel with invertRGB using std::transform.
-    NOT_IMPLEMENTED();
+    std::transform(img.begin(), img.end(), img.begin(), invertRGB);
 }
 void grayscale(Image& img) {
-    // TODO Day 8: use std::transform and a lambda. Set R, G, B to luma(p) and keep alpha.
-    NOT_IMPLEMENTED();
+    std::transform(img.begin(), img.end(), img.begin(),[](Pixel p){
+        int l = luma(p);
+       return pack( l,l,l,alpha(p)); } );
 }
 void threshold(Image& img, int level) {
     // TODO Day 8: use std::transform and a lambda that captures level.
-    NOT_IMPLEMENTED();
+    std::transform(img.begin(),img.end(), img.begin(), [level] (Pixel p) {
+        int l = luma(p);
+    if (l < level){
+        return pack(0,0,0, alpha(p));
+    } 
+        return pack(255,255,255,alpha(p));
+    });
 }
 bool isGrayscale(const Image& img) {
     // TODO Day 8: use std::all_of.
-    NOT_IMPLEMENTED();
+    return std::all_of(img.begin(), img.end(), [] (Pixel p) {return red(p) == green(p) && green(p) == blue(p); });
+
 }
 
 // ---- Day 9 ----
