@@ -7,7 +7,6 @@
 
 int luma(Pixel p) { return (red(p) * 299 + green(p) * 587 + blue(p) * 114) / 1000; }
 
-// ---- Day 8 ----
 void invert(Image& img) {
     std::transform(img.begin(), img.end(), img.begin(), invertRGB);
 }
@@ -17,7 +16,7 @@ void grayscale(Image& img) {
        return pack( l,l,l,alpha(p)); } );
 }
 void threshold(Image& img, int level) {
-    // TODO Day 8: use std::transform and a lambda that captures level.
+
     std::transform(img.begin(),img.end(), img.begin(), [level] (Pixel p) {
         int l = luma(p);
     if (l < level){
@@ -34,32 +33,35 @@ bool isGrayscale(const Image& img) {
 
 // ---- Day 9 ----
 Pixel adjustBrightness(Pixel p, int amount) {
-    // TODO Day 9: add amount to each colour channel, clamp with clampByte, and keep alpha.
-    NOT_IMPLEMENTED();
+    return pack(clampByte(red(p) + amount), clampByte(green(p) + amount), clampByte(blue(p) + amount), alpha(p));
 }
 PixelFn brightness(int amount) {
-    // TODO Day 9: bind adjustBrightness to amount with std::bind and std::placeholders::_1.
-    NOT_IMPLEMENTED();
+   return std::bind(adjustBrightness, std::placeholders::_1, amount);
 }
 PixelFn tint(double r, double g, double b) {
-    // TODO Day 9: return a lambda that multiplies each channel by its factor. Capture by value.
-    NOT_IMPLEMENTED();
+    return [r, g, b] (Pixel p) {
+    return pack(clampByte(red(p) * r),
+    clampByte(green(p) * g),
+    clampByte(blue(p) * b),
+    alpha(p));
+    };
 }
 void applyFn(Image& img, const PixelFn& fn) {
-    // TODO Day 9: apply fn to every pixel with std::transform.
-    NOT_IMPLEMENTED();
+    std::transform(img.begin(), img.end(), img.begin(),fn);
 }
 void applyAll(Image& img, const std::vector<PixelFn>& steps) {
-    // TODO Day 9: apply each function in order.
-    NOT_IMPLEMENTED();
+    for (const PixelFn& fn : steps){
+    std::transform(img.begin(), img.end(), img.begin(),fn);
+    }
 }
 void countInto(int& counter, Pixel p, int level) {
-    // TODO Day 9: add 1 to counter when luma(p) >= level.
-    NOT_IMPLEMENTED();
+    if (luma(p) >= level) 
+    counter++;
 }
 int countWithRef(const Image& img, int level) {
-    // TODO Day 9: bind countInto with std::ref(counter), then pass it to std::for_each. Explain why a plain copy would give 0.
-    NOT_IMPLEMENTED();
+    int counter = 0;
+    std::for_each(img.begin(), img.end(),  std::bind(countInto, std::ref(counter), std::placeholders::_1, level));
+    return counter;
 }
 
 // ---- Day 10 ----
