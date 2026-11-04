@@ -5,16 +5,50 @@
 #include <vector>
 
 int bmpRowBytes(int width) {
-    // TODO Day 6: 3 bytes per pixel, rounded up to a multiple of 4. Use + 3 and a bit mask.
-    NOT_IMPLEMENTED();
+   return ((width * 3) + 3) & (~3);
 }
 void writeLE(std::ostream& out, std::uint32_t value, int bytes) {
-    // TODO Day 6: write the lowest byte first with out.put(), shifting value right by 8 each time.
-    NOT_IMPLEMENTED();
+    for (int i = 0; i < bytes; i ++){
+    out.put(value & 0xFF);
+    value = value >> 8;
+    }
 }
 void saveBmp(const Image& img, const std::string& path) {
     // TODO Day 6: open with ios::binary, throw std::runtime_error if it fails, write the header from Bmp.h, then the rows bottom to top.
-    NOT_IMPLEMENTED();
+    
+    std::ofstream out(path, std::ios::binary);
+    if (!out) {
+        throw std::runtime_error("Cannot open file");
+    }
+    out.put('B');
+    out.put('M');
+    int dataSize = bmpRowBytes(img.width() )* img.height();
+    writeLE(out, 54 + dataSize, 4);
+    writeLE(out, 0 ,4);
+    writeLE(out, 54, 4);
+    writeLE(out, 40, 4);
+    writeLE(out, img.width(), 4);
+    writeLE(out,img.height(),4);
+    writeLE(out,1, 2);
+    writeLE(out,24,2);
+    writeLE(out, 0 ,4);
+    writeLE(out,dataSize,4);
+    writeLE(out,0,4);
+    writeLE(out,0,4);
+    writeLE(out,0,4);
+    writeLE(out,0,4);
+    for (int y = img.height()- 1; y >= 0; y--){
+        for (int x = 0; x< img.width(); x++){
+            Pixel p = img.at(x,y);
+            out.put(blue(p));
+            out.put(green(p));
+            out.put(red(p));
+        }
+        int pad = bmpRowBytes(img.width()) - img.width() * 3;
+        for ( int i = 0; i < pad; i++){
+            out.put(0);
+        }
+    }
 }
 std::uint32_t readLE(std::istream& in, int bytes) {
     // TODO Day 7: read one byte at a time with in.get() and rebuild the value. Throw std::runtime_error if the stream fails.

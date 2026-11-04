@@ -42,8 +42,11 @@ int remainderPow2(int value, int powerOfTwo) {
 }
 
 int clampByte(int value) {
-    // TODO Day 2: write this as a normal function. It takes the place of a macro.
-    NOT_IMPLEMENTED();
+    if (value < 0){
+        return 0;
+    } if (value > 255) {
+        return 255;
+    } return value;
 }
 static int s_calls = 0;
 static int next() { return ++s_calls; }

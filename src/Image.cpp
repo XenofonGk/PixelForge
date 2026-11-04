@@ -5,41 +5,72 @@
 #include <utility>
 
 Image::Image(int width, int height, Pixel fill) {
-    // TODO Day 3: reject negative sizes with std::invalid_argument, allocate width * height pixels with new[], and fill them with std::fill.
-    NOT_IMPLEMENTED();
+    if (width < 0 || height < 0){
+        throw std::invalid_argument("Broken image");
+    }
+    w = width;
+    h = height;
+    data = new Pixel[width * height];
+    std::fill(data,data + width * height,fill);
 }
 Image::~Image() {
-    // TODO Day 3: release the pixel array with delete[].
+   delete[] data;
 }
 Pixel& Image::at(int x, int y) {
-    // TODO Day 3: throw std::out_of_range for a bad x or y, otherwise return the pixel. Use row().
-    NOT_IMPLEMENTED();
+     if (w <= x || h <= y || x < 0 || y < 0){
+        throw std::out_of_range("Out of range");
+    }
+    return row(y)[x];
 }
 const Pixel& Image::at(int x, int y) const {
-    // TODO Day 3: same as above, for const images.
-    NOT_IMPLEMENTED();
+    if (w <= x || h <= y || x < 0 || y < 0){
+        throw std::out_of_range("Out of range");
+    }
+    return row(y)[x];
 }
 Pixel* Image::row(int y) {
-    // TODO Day 3: use pointer arithmetic. Rows are stored one after another.
-    NOT_IMPLEMENTED();
+    return data + y * w;
 }
 const Pixel* Image::row(int y) const {
-    // TODO Day 3: same as above, for const images.
-    NOT_IMPLEMENTED();
+    return data + y * w;
 }
+//Copy constructor
 Image::Image(const Image& other) {
-    // TODO Day 5: deep copy: allocate a new array and copy every pixel with std::copy.
-    NOT_IMPLEMENTED();
+    w = other.w;
+    h = other.h;
+    data = new Pixel[other.w * other.h];
+    std::copy(other.data, other.data + other.w * other.h, data);
 }
+//MOVE
 Image::Image(Image&& other) noexcept {
-    // TODO Day 5: take the pointer and sizes, then leave other empty.
+    w = other.w;
+    h = other.h;
+    data = other.data;
+    other.data = nullptr;
+    other.w = 0;
+    other.h = 0;
+
 }
 Image& Image::operator=(const Image& other) {
-    // TODO Day 5: check self-assignment, release the old array, then deep copy.
-    NOT_IMPLEMENTED();
+    if (this != &other){
+        delete[] data;
+        w = other.w;
+    h = other.h;
+    data = new Pixel[other.w * other.h];
+     std::copy(other.data, other.data + other.w * other.h, data);
+    }
+    return *this;
 }
 Image& Image::operator=(Image&& other) noexcept {
-    // TODO Day 5: check self-assignment, release the old array, then take over other's array. Keep the return below.
+    if (this != &other){
+        delete[] data;
+        w = other.w;
+        h = other.h;
+        data = other.data;
+        other.data = nullptr;
+        other.w = 0;
+        other.h = 0;
+    }
     return *this;
 }
 bool sameImage(const Image& a, const Image& b) {

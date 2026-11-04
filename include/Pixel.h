@@ -30,15 +30,9 @@ Pixel flipChannelBits(Pixel p, std::uint32_t mask); // exclusive-or with a mask
 bool  isOddRed(Pixel p);                        // test the lowest bit of red
 int   remainderPow2(int value, int powerOfTwo); // value % powerOfTwo using & only
 
-// ---- Day 2 ----
-// Write each macro so these uses work:
-//   FORGE_SQUARE(2 + 1) is 9
-//   10 - FORGE_MAX(1, 2) is 8
-//   FORGE_CLAMP(300, 0, 255) is 255
-// TODO Day 2: these three versions have precedence bugs. Fix the parentheses.
-#define FORGE_SQUARE(X) X * X
-#define FORGE_MAX(A, B) A > B ? A : B
-#define FORGE_CLAMP(X, LO, HI) X
+#define FORGE_SQUARE(X) ((X) * (X) )
+#define FORGE_MAX(A, B) ((A) > (B) ? (A) : (B))
+#define FORGE_CLAMP(X, LO, HI) ((X) < (LO) ? (LO) : (X) > (HI) ? (HI) : (X))
 
 // A macro evaluates its argument more than once. This function does not.
 int clampByte(int value);                    // clamp to 0..255, argument used once
