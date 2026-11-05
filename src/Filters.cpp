@@ -64,22 +64,41 @@ int countWithRef(const Image& img, int level) {
     return counter;
 }
 
-// ---- Day 10 ----
 Histogram histogram(const Image& img) {
-    // TODO Day 10: start with all zeros, then use std::for_each to count each pixel's luma.
-    NOT_IMPLEMENTED();
+    Histogram hist{};
+
+    std::for_each(img.begin(), img.end(), [&hist] (Pixel p ) { 
+        hist[luma(p)]++;
+    } );
+    return hist;
 }
 int countBright(const Image& img, int level) {
-    // TODO Day 10: use std::count_if.
-    NOT_IMPLEMENTED();
+    return std::count_if(img.begin(), img.end(), [level] (Pixel p) {
+       return  luma(p) >= level;
+        
+    });
 }
 double meanLuma(const Histogram& hist) {
-    // TODO Day 10: use std::accumulate for the pixel count, and a binary lambda or inner_product for the weighted total. Return 0 for an empty histogram.
-    NOT_IMPLEMENTED();
+    
+    int count = std::accumulate(hist.begin(), hist.end(), 0);
+    if (count == 0) {
+        return 0;
+    }
+    double sum = 0;
+    for (int i = 0; i < 256; i++){
+        sum += i * hist[i];
+    }
+    return sum / count;
 }
 std::vector<Pixel> selectBright(const Image& img, int level) {
     // TODO Day 10: use std::copy_if with std::back_inserter.
-    NOT_IMPLEMENTED();
+    std::vector<Pixel> result{};
+
+    std::copy_if(img.begin(), img.end(), std::back_inserter(result), [level] (Pixel p) {
+       return  luma(p) >= level;
+        
+    });
+    return result;
 }
 
 // ---- Day 12 ----
