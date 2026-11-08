@@ -103,42 +103,109 @@ std::vector<Pixel> selectBright(const Image& img, int level) {
 
 // ---- Day 12 ----
 std::array<int, 256> cumulative(const Histogram& hist) {
-    // TODO Day 12: use std::partial_sum.
-    NOT_IMPLEMENTED();
+    std::array<int, 256> cdf{};
+    std::partial_sum(hist.begin(),hist.end(), cdf.begin());
+    return cdf;
 }
 void equalize(Image& img) {
-    // TODO Day 12: build the cumulative histogram, find its first non-zero value (cdfMin), then map each channel v to (cdf[v] - cdfMin) * 255 / (pixels - cdfMin). Do nothing if the bottom part would be 0.
-    NOT_IMPLEMENTED();
-}
+    std::array<int, 256> cdf = cumulative(histogram(img));
+
+    int cdfMin = 0;
+    for (int i = 0; i < 256; i++){
+        if (cdf[i] != 0){
+            cdfMin = cdf[i];
+            break;
+        }
+    }
+    int pixels = img.width() * img.height();
+
+    int bottom = pixels - cdfMin;
+    if (bottom == 0){
+        return;
+    }
+    std::transform(img.begin(), img.end(),img.begin(), [&cdf, cdfMin, bottom] (Pixel p) {
+        return pack((cdf[red(p)] - cdfMin) * 255 / bottom,(cdf[green(p)] - cdfMin) * 255 / bottom,(cdf[blue(p)] - cdfMin) * 255 / bottom, alpha(p));
+    });
+    }
+
 
 // ---- Day 13 ----
 int weightedSum(const int* weights, const int* samples, int n) {
-    // TODO Day 13: use std::inner_product on the two raw pointer ranges.
-    NOT_IMPLEMENTED();
+    return std::inner_product(weights, weights + n, samples, 0);
 }
 Image convolve(const Image& src, const int (*kernel)[3], int divisor) {
-    // TODO Day 13: for each pixel and channel, collect the 3 by 3 neighbours (clamp coordinates at the edges), sum weightedSum for each kernel row, divide, and clampByte. Keep alpha.
-    NOT_IMPLEMENTED();
+    Image out(src.width(),src.height());
+    for (int y = 0; y < src.height();y++){
+        for (int x = 0; x < src.width(); x++){
+        int sumR{};
+        int sumG{};
+        int sumB{};
+        for (int ky = 0; ky < 3; ky++){
+            int ny = FORGE_CLAMP(y + ky -1, 0,src.height() -1 );
+            int reds[3];
+            int greens[3];
+            int blues[3];
+            for (int kx = 0; kx < 3; kx++){
+                int nx = FORGE_CLAMP(x + kx -1, 0,src.width() -1 );
+                reds[kx] = red(src.at(nx, ny));
+                greens[kx] = green(src.at(nx, ny));
+                blues[kx] = blue(src.at(nx,ny));
+            }
+            sumR += weightedSum(kernel[ky], reds,3);
+            sumG += weightedSum(kernel[ky], greens, 3);
+            sumB += weightedSum(kernel[ky], blues, 3);
+        }
+        out.at(x,y) = pack(clampByte(sumR / divisor), clampByte(sumG / divisor), clampByte(sumB / divisor), alpha(src.at(x,y)));
+        }
+    }
+        return out;
 }
 Image blur(const Image& src) {
-    // TODO Day 13: call convolve with the kernel {1,2,1},{2,4,2},{1,2,1} and divisor 16.
-    NOT_IMPLEMENTED();
+    const int kernel[3][3] = {{1,2,1},{2,4,2},{1,2,1}};
+    return convolve(src, kernel, 16);
 }
 Image sharpen(const Image& src) {
-    // TODO Day 13: call convolve with the kernel {0,-1,0},{-1,5,-1},{0,-1,0} and divisor 1.
-    NOT_IMPLEMENTED();
+    const int kernel[3][3] = {{0,-1,0},{-1,5,-1},{0,-1,0}};
+    return convolve(src, kernel, 1);
 }
 
 // ---- Day 14 ----
 int medianOf(std::array<int, 9> values) {
-    // TODO Day 14: sort the array and return the middle value.
-    NOT_IMPLEMENTED();
+    std::sort(values.begin(), values.end());
+    return values[4];
 }
 Image medianFilter(const Image& src) {
-    // TODO Day 14: for each channel, gather the 3 by 3 window (clamp at the edges) and use medianOf. Keep alpha.
-    NOT_IMPLEMENTED();
+    Image out(src.width(),src.height());
+    for (int y = 0; y < src.height();y++){
+        for (int x = 0; x < src.width(); x++){
+            std::array<int, 9> reds;
+            std::array<int, 9> greens;
+            std::array<int, 9> blues;
+            int i = 0;
+            for (int ky = 0; ky < 3; ky++){
+                int ny = FORGE_CLAMP(y + ky -1, 0,src.height() -1 );
+                for (int kx = 0; kx < 3; kx++){
+                    int nx = FORGE_CLAMP(x + kx -1, 0,src.width() -1 );
+                reds[i] = red(src.at(nx, ny));
+                greens[i] = green(src.at(nx, ny));
+                blues[i] = blue(src.at(nx,ny));
+                i++;
+            }
+            }
+             out.at(x,y) = pack(medianOf(reds),medianOf(greens), medianOf(blues), alpha(src.at(x,y)));
+        }
+    }
+    return out;
 }
 std::vector<int> topLumas(const Image& img, int n) {
-    // TODO Day 14: collect the lumas, sort with std::greater<int>(), and keep the first n.
-    NOT_IMPLEMENTED();
+   std::vector<int> lumas{};
+    for (Pixel p : img){
+        lumas.push_back(luma(p));
+        }
+         std::sort(lumas.begin(), lumas.end(), std::greater<int>());
+         if (n < lumas.size()){
+        lumas.resize(n);
+    }
+    return lumas;
 }
+
